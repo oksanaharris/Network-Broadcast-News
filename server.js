@@ -14,16 +14,16 @@ const net = require('net');
 
 
 
-//create a new server
-//set the server to listen on address '0.0.0.0' and port '6969'
-//set the server to listen for and accept socket conections
+//X - create a new server
+//X - set the server to listen to port '6969' and bind to host '0.0.0.0'
+//X - set the server to listen for and accept socket conections - connect event listener
 
 //watch which sockets are connected and remove any that disconnect
 
-//a connected socket should be a duplex stream
+//X - a connected socket should be a duplex stream - it is by default
 
-//a connected socket should be able to emit a 'data' event
-//when a connected socket emits a 'data' event, broadcast the data to all sockets
+//X - a connected socket should be able to emit a 'data' event - by default
+//X - when a connected socket emits a 'data' event, 'broadcast' (write to each) the data to all sockets
 
 
 
@@ -60,6 +60,10 @@ server.on('connection', function (clientConnection){
         connection.write(input.toString());
       }
     });
+  });
+
+  clientConnection.on('close', (connection) => {
+    clientConnectionArr.splice(clientConnectionArr.indexOf(connection), 1);
   });
 });
 
