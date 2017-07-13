@@ -27,30 +27,42 @@ const net = require('net');
 
 
 
-// console.log(net);
-// console.log(net.Server);
-
-// var newSocket = new net.Socket();
-
-// console.log(newSocket);
-
-// const server = new net.Server();
-
-
 const server = net.createServer();
+
+const clientConnectionArr = [];
+
+server.listen(6969, '0.0.0.0', function () {
+  console.log('server is listening to see if anything is trying to connect to 6969 port');
+});
+
+server.on('listening', function () {
+  console.log('this is the listen event');
+});
 
 server.on('error', (err) => {
   throw err;
 });
 
-server.on('connection', function (socket){
+server.on('connection', function (clientConnection){
   console.log('new connection');
 
-  socket.on('data', (input) => {
+  clientConnectionArr.push(clientConnection);
+  console.log('client connections now: ', clientConnectionArr.length);
+
+  var clientData;
+
+  clientConnection.on('data', (input) => {
     console.log(input.toString());
+
+    clientConnectionArr.forEach((connection) => {
+      //so it doesn't write to itself
+      if(connection != clientConnection){
+        connection.write(input.toString());
+      }
+    });
   });
 });
 
-server.listen(6969, '0.0.0.0', function () {
-  console.log('server is listening to 6969 port');
-});
+
+
+

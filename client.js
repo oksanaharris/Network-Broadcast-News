@@ -7,20 +7,19 @@
 
 const net = require('net');
 
-// var socket = new net.Socket();
-var client = net.createConnection(6969, '0.0.0.0', connectListener);
+var serverConnection = net.createConnection(6969, '0.0.0.0', connectListener);
 
 function connectListener(){
-  console.log('I happen when i dont know when or why');
+  console.log('I happen when a connection is established to the specified server');
 
-  client.write('blah blah blah');
+  process.stdin.on('data', (input) => {
+    serverConnection.write(input.toString());
+  });
 
-  process.stdin.on('data', (chunk) => {
-    let string = chunk.toString();
-    client.write(string);
+  serverConnection.on('data', (input) => {
+    console.log('Simon Says:', input.toString());
   });
 }
 
 
 
-// console.log(socket);
