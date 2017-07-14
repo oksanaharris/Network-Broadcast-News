@@ -17,7 +17,7 @@ function connectListener(){
   });
 
   serverConnection.on('data', (input) => {
-    console.log('Simon Says:', input.toString());
+    console.log(input.toString());
   });
 }
 

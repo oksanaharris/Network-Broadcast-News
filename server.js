@@ -30,13 +30,13 @@ const net = require('net');
 const server = net.createServer();
 
 const clientConnectionArr = [];
+console.log('starting client connection array', clientConnectionArr);
+
+const userNames = [];
+console.log('starting user name array', userNames);
 
 server.listen(6969, '0.0.0.0', function () {
   console.log('server is listening to see if anything is trying to connect to 6969 port');
-});
-
-server.on('listening', function () {
-  console.log('this is the listen event');
 });
 
 server.on('error', (err) => {
@@ -49,23 +49,66 @@ server.on('connection', function (clientConnection){
   clientConnectionArr.push(clientConnection);
   console.log('client connections now: ', clientConnectionArr.length);
 
-  var clientData;
+  clientConnection.write('First, choose a user name:');
 
-  clientConnection.on('data', (input) => {
-    console.log(input.toString());
-
-    clientConnectionArr.forEach((connection) => {
-      //so it doesn't write to itself
-      if(connection != clientConnection){
-        connection.write(input.toString());
+  clientConnection.on('data', (input) =>{
+    const string = input.toString().slice(0,-1);
+    if (!clientConnection.username){
+      if (string === '[ADMIN]' || userNames.indexOf(string) > -1){
+        clientConnection.write('Can\'t use that username.');
+      } else {
+        clientConnection.username = string;
+        userNames.push(string);
       }
-    });
+    } else {
+      clientConnectionArr.forEach((connection) => {
+      //so it doesn't write to itself
+        if(connection != clientConnection){
+          connection.write(clientConnection.username + ': ' + string);
+          console.log(clientConnection.username + ': ' + string);
+        }
+      });
+    }
   });
 
   clientConnection.on('close', (connection) => {
     clientConnectionArr.splice(clientConnectionArr.indexOf(connection), 1);
   });
+
 });
+
+process.stdin.on('data', (input) => {
+  const string = input.toString().slice(0,-1);
+
+  if (string.search('\\kick') > -1 ){
+    console.log('seeing command kick');
+    var username = string.substring(6);
+
+    if(userNames.indexOf(username) > -1){
+      clientConnectionArr.forEach((connection, index, array) => {
+        if (connection.username === username){
+          connection.write('You have been kicked out of the session.');
+          console.log(connection.username, ' has been kicked out!');
+          connection.destroy();
+          array.splice(index, 1);
+        }
+      });
+      userNames.splice(userNames.indexOf(username), 1);
+      return;
+    }
+
+  } else {
+    console.log('firing');
+    clientConnectionArr.forEach((connection) => {
+      console.log('what is happening here');
+      connection.write('[ADMIN]:' + string);
+    });
+  }
+
+});
+
+
+
 
 
 
